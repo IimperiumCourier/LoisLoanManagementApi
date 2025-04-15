@@ -39,7 +39,7 @@ The **Loan Management API** provides a comprehensive set of endpoints to manage 
 
 ## 📫 Contact
 
-For support or integration assistance, please contact the development team at [your-email@example.com].
+For support or integration assistance, please contact the development team at [wizekingsley@gmail.com].
 
 ---
 
