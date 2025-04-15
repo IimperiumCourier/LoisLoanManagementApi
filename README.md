@@ -45,5 +45,5 @@ For support or integration assistance, please contact the development team at [w
 
 ## 📌 License
 
-This project is licensed under [MIT](LICENSE) or your preferred license.
+This project has no license.
 
