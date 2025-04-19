@@ -17,9 +17,11 @@ namespace Loan_Backend.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IAdminService adminService;
-        public UserController(IAdminService adminService)
+        private readonly ICurrentUser currentUser;
+        public UserController(IAdminService adminService, ICurrentUser currentUser)
         {
             this.adminService = adminService;
+            this.currentUser = currentUser;
         }
 
         [HttpPost]
@@ -27,12 +29,7 @@ namespace Loan_Backend.API.Controllers
         [HasPermission("CanCreateAdmin")]
         public async Task<ActionResult> CreateAdmin(CreateAdminRequest request)
         {
-            var userId = User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier);
-            if(userId == null)
-            {
-                return Unauthorized(ResponseWrapper<AdminDto>.Error("Hi request is unauthorized."));
-            }
-            var response = await adminService.CreateAdmin(request, Guid.Parse(userId.Value));
+            var response = await adminService.CreateAdmin(request, Guid.Parse(currentUser.Id!));
 
             if (!response.IsSuccessful)
             {
@@ -47,12 +44,7 @@ namespace Loan_Backend.API.Controllers
         [HasPermission("CanCreateOperator")]
         public async Task<ActionResult> CreateOperator(CreateAdminRequest request)
         {
-            var userId = User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier);
-            if (userId == null)
-            {
-                return Unauthorized(ResponseWrapper<AdminDto>.Error("Hi request is unauthorized."));
-            }
-            var response = await adminService.CreateAdmin(request, Guid.Parse(userId.Value), isOperator: true);
+            var response = await adminService.CreateAdmin(request, Guid.Parse(currentUser.Id!), isOperator: true);
 
             if (!response.IsSuccessful)
             {
@@ -82,12 +74,7 @@ namespace Loan_Backend.API.Controllers
         [HasPermission("CanResetPassword")]
         public async Task<ActionResult> ChangePassword(PasswordChangeRequest request)
         {
-            var userId = User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier);
-            if (userId == null)
-            {
-                return Unauthorized(ResponseWrapper<AdminDto>.Error("Hi request is unauthorized."));
-            }
-            var response = await adminService.ChangePassword(Guid.Parse(userId.Value), request.Password, request.ConfirmedPassword);
+            var response = await adminService.ChangePassword(Guid.Parse(currentUser.Id!), request.Password, request.ConfirmedPassword);
 
             if (!response.IsSuccessful)
             {

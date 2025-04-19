@@ -2,6 +2,7 @@
 using Loan_Backend.Domain.Interface;
 using Loan_Backend.SharedKernel;
 using Loan_Backend.SharedKernel.Model.DTO;
+using Loan_Backend.SharedKernel.Model.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,20 +129,25 @@ namespace Loan_Backend.Infrastructure.Service
             return ResponseWrapper<PagedResult<PaymentLog>>.Success(pagedResult);
         }
 
-        public async Task<ResponseWrapper<PaymentLog>> LogPayment(Guid loanId, decimal amount, string currencyCode, string loggedBy)
+        public async Task<ResponseWrapper<PaymentLog>> LogPayment(CreatePaymentLogReq logRequest, string loggedBy)
         {
-            var loan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(loanId);
+            if (string.IsNullOrWhiteSpace(loggedBy))
+            {
+                return ResponseWrapper<PaymentLog>.Error("Request is unauthorized.");
+            }
+
+            var loan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(logRequest.LoanId);
             if (loan is null)
             {
                 return ResponseWrapper<PaymentLog>.Error("Loan record not found.");
             }
 
-            if(!string.Equals(loan.CurrencyCode, currencyCode, StringComparison.OrdinalIgnoreCase))
+            if(!string.Equals(loan.CurrencyCode, logRequest.CurrencyCode, StringComparison.OrdinalIgnoreCase))
             {
                 return ResponseWrapper<PaymentLog>.Error("Currency code does not match loan record.");
             }
 
-            var paymentLog = PaymentLog.Create(loanId, amount, currencyCode, loggedBy);
+            var paymentLog = PaymentLog.Create(logRequest.LoanId, logRequest.Amount, logRequest.CurrencyCode, loggedBy);
             await unitOfWork.PaymentLogRepository.AddAsync(paymentLog);
 
             var count = await unitOfWork.SaveAsync();
