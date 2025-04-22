@@ -28,7 +28,7 @@ namespace Loan_Backend.Domain.Entities
         {
             return new Permission
             {
-                Name = name.ToProperCase(),
+                Name = name.ToTrimmedAndLowerCase(),
                 CreatedAt = DateTime.UtcNow.AddHours(1),
                 IsActive = true
             };
@@ -44,6 +44,11 @@ namespace Loan_Backend.Domain.Entities
         {
             IsActive = true;
             LastDateUpdated = DateTime.UtcNow.AddHours(1);
+        }
+
+        public List<RolePermission> CreateRolePermission(List<Guid> roleIds, Guid grantorId)
+        {
+            return [.. roleIds.Select(roleId => RolePermission.Create(roleId, Id, grantorId))];
         }
     }
 }

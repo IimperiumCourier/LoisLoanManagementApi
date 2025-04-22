@@ -28,7 +28,7 @@ namespace Loan_Backend.Domain.Entities
         {
             return new Role
             {
-                Name = name.ToProperCase(),
+                Name = name.ToTrimmedAndLowerCase(),
                 CreatedAt = DateTime.UtcNow.AddHours(1),
                 IsActive = true
             };

@@ -25,7 +25,7 @@ namespace Loan_Backend.Domain.Entities
 
         }
 
-        internal static AdminRole Create(Guid adminId, Guid roleId, Guid grantorId)
+        public static AdminRole Create(Guid adminId, Guid roleId, Guid grantorId)
         {
             return new AdminRole
             {

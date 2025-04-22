@@ -22,6 +22,7 @@ namespace Loan_Backend.Infrastructure.Repository.Context
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<AdminRole> AdminRoles { get; set; }
         public DbSet<PaymentLog> PaymentLogs { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

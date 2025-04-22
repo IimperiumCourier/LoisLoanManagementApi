@@ -52,6 +52,14 @@ namespace Loan_Backend.SharedKernel
 
             return result.ToString();
         }
+
+        public static string ToTrimmedAndLowerCase(this string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) { return string.Empty; }
+            input = input.Trim().ToLower();
+
+            return input;
+        }
     }
 
 }

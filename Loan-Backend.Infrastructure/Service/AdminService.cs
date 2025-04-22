@@ -77,7 +77,7 @@ namespace Loan_Backend.Infrastructure.Service
 
             var admin = Admin.Create(request.FullName, request.EmailAddress, request.PhoneNumber, request.Password);
 
-            var roleName = isOperator ? "Operator" : "Admin";
+            var roleName = isOperator ? "operator" : "admin";
             var roleEnumerable = await unitOfWork.RoleRepository.FindAsync(e => e.Name == roleName);
             var role = roleEnumerable.FirstOrDefault();
 
@@ -125,7 +125,7 @@ namespace Loan_Backend.Infrastructure.Service
 
         public async Task<ResponseWrapper<PagedResult<AdminDto>>> GetAllUsersWithSpecifiedRole(bool isOperator, int pageNum, int pageSize)
         {
-            var roleName = isOperator ? "Operator" : "Admin";
+            var roleName = isOperator ? "operator" : "admin";
             var roleEnumerable = await unitOfWork.RoleRepository.FindAsync(e => e.Name == roleName);
             var role = roleEnumerable.FirstOrDefault();
 
