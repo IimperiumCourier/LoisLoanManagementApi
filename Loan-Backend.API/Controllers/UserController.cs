@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Net.Mime;
 using System.Security.Claims;
 
 namespace Loan_Backend.API.Controllers
@@ -26,7 +27,10 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("admin")]
-        [HasPermission("CanCreateAdmin")]
+        [ProducesResponseType(typeof(ResponseWrapper<AdminDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<AdminDto>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_create_admin")]
         public async Task<ActionResult> CreateAdmin(CreateAdminRequest request)
         {
             var response = await adminService.CreateAdmin(request, Guid.Parse(currentUser.Id!));
@@ -41,7 +45,10 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("operator")]
-        [HasPermission("CanCreateOperator")]
+        [ProducesResponseType(typeof(ResponseWrapper<AdminDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<AdminDto>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_create_operator")]
         public async Task<ActionResult> CreateOperator(CreateAdminRequest request)
         {
             var response = await adminService.CreateAdmin(request, Guid.Parse(currentUser.Id!), isOperator: true);
@@ -56,7 +63,10 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("reset-password")]
-        [HasPermission("CanResetPassword")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_reset_password")]
         public async Task<ActionResult> ResetPassword(PasswordResetRequest request)
         {
             var response = await adminService.ChangePassword(request.Id, request.Password, request.ConfirmedPassword);
@@ -71,7 +81,10 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("change-password")]
-        [HasPermission("CanResetPassword")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_reset_password")]
         public async Task<ActionResult> ChangePassword(PasswordChangeRequest request)
         {
             var response = await adminService.ChangePassword(Guid.Parse(currentUser.Id!), request.Password, request.ConfirmedPassword);
@@ -86,7 +99,10 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("deactivate")]
-        [HasPermission("CanDeactivateAccount")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_deactivate_account")]
         public async Task<ActionResult> DeactivateAccount(DeactivateAccountRequest request)
         {
             var response = await adminService.DeactivateAdmin(request.Id);
@@ -101,7 +117,10 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("activate")]
-        [HasPermission("CanActivateAccount")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_activate_account")]
         public async Task<ActionResult> ActivateAccount(ActivateAccountRequest request)
         {
             var response = await adminService.ActivateAdmin(request.Id);
@@ -116,7 +135,10 @@ namespace Loan_Backend.API.Controllers
 
         [HttpGet]
         [Route("admin/pagenumber/{pagenumber}/pagesize/{pagesize}")]
-        [HasPermission("CanViewAdminList")]
+        [ProducesResponseType(typeof(ResponseWrapper<PagedResult<AdminDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<PagedResult<AdminDto>>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_view_admin_list")]
         public async Task<ActionResult> GetAllAdmins(int pagenumber, int pagesize)
         {
             var response = await adminService.GetAllUsersWithSpecifiedRole(false, pagenumber, pagesize);
@@ -130,7 +152,10 @@ namespace Loan_Backend.API.Controllers
 
         [HttpGet]
         [Route("operator/pagenumber/{pagenumber}/pagesize/{pagesize}")]
-        [HasPermission("CanViewOperatorList")]
+        [ProducesResponseType(typeof(ResponseWrapper<PagedResult<AdminDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<PagedResult<AdminDto>>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_view_operator_list")]
         public async Task<ActionResult> GetAllOperators(int pagenumber, int pagesize)
         {
             var response = await adminService.GetAllUsersWithSpecifiedRole(true, pagenumber, pagesize);

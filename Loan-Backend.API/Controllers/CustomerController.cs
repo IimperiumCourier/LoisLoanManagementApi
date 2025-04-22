@@ -1,4 +1,5 @@
-﻿using Loan_Backend.Domain.Interface;
+﻿using Loan_Backend.Domain.Entities;
+using Loan_Backend.Domain.Interface;
 using Loan_Backend.SharedKernel;
 using Loan_Backend.SharedKernel.Model.DTO;
 using Loan_Backend.SharedKernel.Model.Request;
@@ -6,6 +7,7 @@ using Loan_Backend.SharedKernel.Model.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
 using System.Security.Claims;
 
 namespace Loan_Backend.API.Controllers
@@ -22,6 +24,9 @@ namespace Loan_Backend.API.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(ResponseWrapper<CreateCustomerRes>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<CreateCustomerRes>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
         public async Task<ActionResult> CreateCustomer(CreateCustomerReq request)
         {
             var userId = User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier);
@@ -42,6 +47,9 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("search")]
+        [ProducesResponseType(typeof(ResponseWrapper<PagedResult<Customer>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<PagedResult<Customer>>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
         public async Task<ActionResult> GetCustomer(CustomerFilter request)
         {
             var response = await customerService.GetCustomerByFilter(request);
@@ -56,6 +64,9 @@ namespace Loan_Backend.API.Controllers
 
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(typeof(ResponseWrapper<Customer>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<Customer>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
         public async Task<ActionResult> GetCustomerById(Guid id)
         {
             var response = await customerService.GetCustomerById(id);

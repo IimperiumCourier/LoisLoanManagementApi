@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Net.Mime;
+using Loan_Backend.SharedKernel.Model.Response;
 
 namespace Loan_Backend.API.Controllers
 {
@@ -24,6 +26,9 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("login")]
+        [ProducesResponseType(typeof(ResponseWrapper<AuthenticationResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<AuthenticationResponse>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
         [AllowAnonymous]
         public async Task<ActionResult> Login(AuthenticationRequest request)
         {
@@ -39,6 +44,9 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("refresh-jwt-token")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
         public async Task<ActionResult> RefreshJWTToken([FromQuery] string refreshToken)
         {
             var response = await authenticationService.RefreshToken(refreshToken);

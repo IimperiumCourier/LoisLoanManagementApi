@@ -104,7 +104,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<LoanAppDbContext>();
     db.Database.Migrate();
 
-    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    //var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
     //await seeder.SeedRolesFromExcelIfEmptyAsync();
     //await seeder.SeedPermissionsFromExcelIfEmptyAsync();
 }

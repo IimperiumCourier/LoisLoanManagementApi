@@ -21,7 +21,7 @@ namespace Loan_Backend.API.Controllers
         }
 
         [HttpPost]
-        [HasPermission("CanLogPayment")]
+        [HasPermission("can_log_payment")]
         public async Task<ActionResult> LogPayment(CreatePaymentLogReq request)
         {
             var response = await paymentLogService.LogPayment(request, currentUser.Id!);
@@ -36,7 +36,7 @@ namespace Loan_Backend.API.Controllers
 
         [HttpGet]
         [Route("loan/{loanId}/pageNumber/{pageNumber}/pagesize/{pageSize}")]
-        [HasPermission("CanViewPaymentLog")]
+        [HasPermission("can_view_payment_log")]
         public async Task<ActionResult> GetPaymentLogByLoanId(Guid loanId, int pageNumber, int pageSize)
         {
             var response = await paymentLogService.GetPaymentLogUsingLoanId(loanId, pageNumber, pageSize);
@@ -51,7 +51,7 @@ namespace Loan_Backend.API.Controllers
 
         [HttpGet]
         [Route("pageNumber/{pageNumber}/pagesize/{pageSize}")]
-        [HasPermission("CanViewPaymentLog")]
+        [HasPermission("can_view_payment_log")]
         public async Task<ActionResult> GetPaymentLogPendingApproval(int pageNumber, int pageSize)
         {
             var response = await paymentLogService.GetPaymentLogsPendingApproval(pageNumber, pageSize);
@@ -66,7 +66,7 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("{paymentLogId}/approve")]
-        [HasPermission("CanApprovePayment")]
+        [HasPermission("can_approve_payment")]
         public async Task<ActionResult> ApprovePayment(Guid paymentLogId)
         {
             var response = await paymentLogService.ApprovePayment(paymentLogId, currentUser.Id!);
@@ -81,7 +81,7 @@ namespace Loan_Backend.API.Controllers
 
         [HttpPost]
         [Route("{paymentLogId}/decline")]
-        [HasPermission("CanApprovePayment")]
+        [HasPermission("can_approve_payment")]
         public async Task<ActionResult> DeclinePayment(Guid paymentLogId)
         {
             var response = await paymentLogService.DeclinePayment(paymentLogId, currentUser.Id!);
