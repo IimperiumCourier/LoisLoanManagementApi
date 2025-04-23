@@ -24,6 +24,10 @@ namespace Loan_Backend.Domain.Entities
         public string SelfieUrl { get; private set; }
         public Guarantor Guarantor { get; private set; }
         public Identification Identification { get; private set; }
+        public bool IsActive { get; private set; }
+        public DateTime LastDateDeactivated { get; private set; }
+        public DateTime LastDateActivated { get; private set; }
+        public DateTime DateCreated { get; private set; }
 
         public Customer(Guid id):base(id)
         {
@@ -48,12 +52,15 @@ namespace Loan_Backend.Domain.Entities
                 MonthlyIncome = request.MonthlyIncome,
                 Phonenumber = request.Phonenumber,
                 ResidentialAddress = request.ResidentialAddress,
-                SelfieUrl = request.SelfieUrl
+                SelfieUrl = request.SelfieUrl,
+                IsActive = true,
+                DateCreated = DateTime.UtcNow.AddHours(1),
+                LastDateActivated = DateTime.UtcNow.AddHours(1),
+                LastDateDeactivated = DateTime.MinValue
             };
 
             if(request.Guarantor != null)
             {
-
                 customer.Guarantor = Guarantor.Create(request.Guarantor);
             }
 
@@ -68,6 +75,18 @@ namespace Loan_Backend.Domain.Entities
         public CustomerLoan CreateLoan(LoanPreference loanPreference, string createdBy)
         {
             return CustomerLoan.Create(Id, createdBy, loanPreference);
+        }
+
+        public void Deactivate()
+        {
+            IsActive = false;
+            LastDateDeactivated = DateTime.UtcNow.AddHours(1);
+        }
+
+        public void Activate()
+        {
+            IsActive = true;
+            LastDateActivated = DateTime.UtcNow.AddHours(1);
         }
     }
 }

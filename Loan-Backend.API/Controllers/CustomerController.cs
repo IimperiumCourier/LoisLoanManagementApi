@@ -1,4 +1,5 @@
-﻿using Loan_Backend.Domain.Entities;
+﻿using Loan_Backend.API.Attribute;
+using Loan_Backend.Domain.Entities;
 using Loan_Backend.Domain.Interface;
 using Loan_Backend.SharedKernel;
 using Loan_Backend.SharedKernel.Model.DTO;
@@ -18,9 +19,15 @@ namespace Loan_Backend.API.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService customerService;
-        public CustomerController(ICustomerService customerService)
+        private readonly ICustomerLoanService customerLoanService;
+        private readonly ICurrentUser currentUser;
+        public CustomerController(ICustomerService customerService,
+                                  ICustomerLoanService customerLoanService,
+                                  ICurrentUser currentUser)
         {
             this.customerService = customerService;
+            this.customerLoanService = customerLoanService;
+            this.currentUser = currentUser;
         }
 
         [HttpPost]
@@ -70,6 +77,129 @@ namespace Loan_Backend.API.Controllers
         public async Task<ActionResult> GetCustomerById(Guid id)
         {
             var response = await customerService.GetCustomerById(id);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("{id}/delete")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async Task<ActionResult> DeleteCustomer(Guid id)
+        {
+            var response = await customerService.DeleteCustomer(id);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("loan/{id}/approve")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_approve_loan")]
+        public async Task<ActionResult> ApproveCustomerLoan(Guid id)
+        {
+            var response = await customerLoanService.ApproveLoan(id, currentUser.Id!);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("loan")]
+        [ProducesResponseType(typeof(ResponseWrapper<CustomerLoan>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<CustomerLoan>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_initiate_loan")]
+        public async Task<ActionResult> CreateCustomerLoan(CreateLoanReq request)
+        {
+            var response = await customerLoanService.CreateLoan(request, currentUser.Id!);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("loan/{id}/decline")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_decline_loan")]
+        public async Task<ActionResult> DeclineCustomerLoan(Guid id)
+        {
+            var response = await customerLoanService.DeclineLoan(id);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("loan/{id}/defaulted")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async Task<ActionResult> SetDefaultedCustomerLoan(Guid id)
+        {
+            var response = await customerLoanService.DefaultLoan(id);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("loan/{id}")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async Task<ActionResult> GetCustomerLoan(Guid id)
+        {
+            var response = await customerLoanService.GetLoanById(id);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+
+        [HttpPost]
+        [Route("{customerId}/loans/pagenumber/{pagenum}/pagesize/{pagesize}")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async Task<ActionResult> GetCustomerLoans(Guid customerId, int pagenum, int pagesize)
+        {
+            var response = await customerLoanService.GetLoanByCustomerId(customerId, pagenum, pagesize);
 
             if (!response.IsSuccessful)
             {

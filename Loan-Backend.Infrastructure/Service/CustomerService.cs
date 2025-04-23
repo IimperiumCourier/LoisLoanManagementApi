@@ -69,6 +69,27 @@ namespace Loan_Backend.Infrastructure.Service
             return ResponseWrapper<CreateCustomerRes>.Success(CreateCustomerRes.Create(customer.Id, customerLoan.Id),"Operation was successful");
         }
 
+        public async Task<ResponseWrapper<Customer>> DeleteCustomer(Guid customerId)
+        {
+            var customer = await unitOfWork.CustomerRepository.GetByIdAsync(customerId);
+            if (customer == null)
+            {
+                return ResponseWrapper<Customer>.Error("No record found.");
+            }
+
+            customer.Deactivate();
+
+            await unitOfWork.CustomerRepository.UpdateAsync(customer);
+            var count = await unitOfWork.SaveAsync();
+
+            if(count <= 0)
+            {
+                return ResponseWrapper<Customer>.Error("Customer record was not successfully deleted.");
+            }
+
+            return ResponseWrapper<Customer>.Error("Customer record was successfully deleted.");
+        }
+
         public async Task<ResponseWrapper<PagedResult<Customer>>> GetCustomerByFilter(CustomerFilter filter)
         {
             var expression = CustomerFilterBuilder.Build(filter);
@@ -98,13 +119,7 @@ namespace Loan_Backend.Infrastructure.Service
 
         public async Task<ResponseWrapper<Customer>> GetCustomerById(Guid customerId)
         {
-            var queryResult = await unitOfWork.CustomerRepository.FindAsync(customer => customer.Id == customerId);
-            if (queryResult == null)
-            {
-                return ResponseWrapper<Customer>.Error("No record found.");
-            }
-
-            var customer = queryResult.FirstOrDefault();
+            var customer = await unitOfWork.CustomerRepository.GetByIdAsync(customerId);
             if(customer == null)
             {
                 return ResponseWrapper<Customer>.Error("No record found.");

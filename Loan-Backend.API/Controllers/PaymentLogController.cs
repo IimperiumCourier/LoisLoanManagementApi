@@ -35,11 +35,11 @@ namespace Loan_Backend.API.Controllers
         }
 
         [HttpGet]
-        [Route("loan/{loanId}/pageNumber/{pageNumber}/pagesize/{pageSize}")]
+        [Route("loan/{loanId}/pagenumber/{pagenumber}/pagesize/{pagesize}")]
         [HasPermission("can_view_payment_log")]
-        public async Task<ActionResult> GetPaymentLogByLoanId(Guid loanId, int pageNumber, int pageSize)
+        public async Task<ActionResult> GetPaymentLogByLoanId(Guid loanId, int pagenumber, int pagesize)
         {
-            var response = await paymentLogService.GetPaymentLogUsingLoanId(loanId, pageNumber, pageSize);
+            var response = await paymentLogService.GetPaymentLogUsingLoanId(loanId, pagenumber, pagesize);
 
             if (!response.IsSuccessful)
             {
@@ -50,11 +50,11 @@ namespace Loan_Backend.API.Controllers
         }
 
         [HttpGet]
-        [Route("pageNumber/{pageNumber}/pagesize/{pageSize}")]
+        [Route("pagenumber/{pagenumber}/pagesize/{pagesize}")]
         [HasPermission("can_view_payment_log")]
-        public async Task<ActionResult> GetPaymentLogPendingApproval(int pageNumber, int pageSize)
+        public async Task<ActionResult> GetPaymentLogPendingApproval(int pagenumber, int pagesize)
         {
-            var response = await paymentLogService.GetPaymentLogsPendingApproval(pageNumber, pageSize);
+            var response = await paymentLogService.GetPaymentLogsPendingApproval(pagenumber, pagesize);
 
             if (!response.IsSuccessful)
             {

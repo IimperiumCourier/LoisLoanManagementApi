@@ -16,5 +16,6 @@ namespace Loan_Backend.Domain.Interface
         Task<ResponseWrapper<CreateCustomerRes>> CreateCustomer(CreateCustomerReq request, string createdBy);
         Task<ResponseWrapper<PagedResult<Customer>>> GetCustomerByFilter(CustomerFilter filter);
         Task<ResponseWrapper<Customer>> GetCustomerById(Guid customerId);
+        Task<ResponseWrapper<Customer>> DeleteCustomer(Guid customerId);
     }
 }
