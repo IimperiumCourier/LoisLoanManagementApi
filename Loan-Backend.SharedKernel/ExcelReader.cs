@@ -23,5 +23,30 @@ namespace Loan_Backend.SharedKernel
 
             return worksheet;
         }
+
+        public static List<string[]> GetCsvRows(string rootPath, string folder, string fileName)
+        {
+            var filePath = Path.Combine(rootPath, folder, fileName);
+            if (!File.Exists(filePath)) return null!;
+
+            var rows = new List<string[]>();
+
+            using var reader = new StreamReader(filePath);
+
+            // Skip the header row
+            reader.ReadLine();
+
+            while (!reader.EndOfStream)
+            {
+                var line = reader.ReadLine();
+                if (line == null) continue;
+
+                var values = line.Split(',');
+                rows.Add(values);
+            }
+
+            return rows;
+        }
+
     }
 }

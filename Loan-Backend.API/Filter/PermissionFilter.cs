@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Loan_Backend.SharedKernel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Linq;
 using System.Security.Claims;
@@ -30,7 +31,9 @@ namespace Loan_Backend.API.Filter
 
             if (!hasPermission)
             {
-                context.Result = new ForbidResult();
+                var response = ResponseWrapper<string>.Error("Hi, you do not have the required permission to carry out this action");
+
+                context.Result = new JsonResult(response) { StatusCode = StatusCodes.Status401Unauthorized }; //ForbidResult(response.ToJson());
             }
         }
     }
