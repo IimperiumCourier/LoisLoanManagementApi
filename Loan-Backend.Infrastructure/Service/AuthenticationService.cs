@@ -64,8 +64,9 @@ namespace Loan_Backend.Infrastructure.Service
                 return ResponseWrapper<AuthenticationResponse>.Error("Role permissions not found");
             }
 
-            var permissionEnumeration = await unitOfWork.PermissionRepository.FindAsync(e => rolePermissions.Contains(e.Id) && e.IsActive);
-            var permissions = permissionEnumeration.Select(e => e.Name).ToList();
+            var permissionEnumeration = await unitOfWork.PermissionRepository.GetAllAsync();
+            var allPemissions = permissionEnumeration.ToList();
+            var permissions = allPemissions.Where(e => rolePermissions.Contains(e.Id) && e.IsActive).Select(e => e.Name).ToList();
             if (permissions == null)
             {
                 return ResponseWrapper<AuthenticationResponse>.Error("Permissions not found");
@@ -121,8 +122,9 @@ namespace Loan_Backend.Infrastructure.Service
                 return ResponseWrapper<string>.Error("Role permissions not found");
             }
 
-            var permissionEnumeration = await unitOfWork.PermissionRepository.FindAsync(e => rolePermissions.Contains(e.Id) && e.IsActive);
-            var permissions = permissionEnumeration.Select(e => e.Name).ToList();
+            var permissionEnumeration = await unitOfWork.PermissionRepository.GetAllAsync();
+            var allPemissions = permissionEnumeration.ToList();
+            var permissions = allPemissions.Where(e => rolePermissions.Contains(e.Id) && e.IsActive).Select(e => e.Name).ToList();
             if (permissions == null)
             {
                 return ResponseWrapper<string>.Error("Permissions not found");
