@@ -91,6 +91,7 @@ namespace Loan_Backend.API.Controllers
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
         [Consumes(MediaTypeNames.Application.Json)]
+        [HasPermission("can_delete_customer_record")]
         public async Task<ActionResult> DeleteCustomer(Guid id)
         {
             var response = await customerService.DeleteCustomer(id);

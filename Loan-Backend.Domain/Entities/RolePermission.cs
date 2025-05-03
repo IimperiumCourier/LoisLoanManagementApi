@@ -25,7 +25,7 @@ namespace Loan_Backend.Domain.Entities
 
         }
 
-        internal static RolePermission Create(Guid roleId, Guid permissionId, Guid grantorId)
+        public static RolePermission Create(Guid roleId, Guid permissionId, Guid grantorId)
         {
             return new RolePermission
             {

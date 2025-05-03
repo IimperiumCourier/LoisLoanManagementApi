@@ -70,6 +70,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IAdminRoleService, AdminRoleService>();
+builder.Services.AddScoped<DataSeeder>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
@@ -104,9 +105,11 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<LoanAppDbContext>();
     db.Database.Migrate();
 
-    //var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-    //await seeder.SeedRolesFromExcelIfEmptyAsync();
-    //await seeder.SeedPermissionsFromExcelIfEmptyAsync();
+    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    await seeder.SeedRolesFromExcelIfEmptyAsync();
+    await seeder.SeedPermissionsFromExcelIfEmptyAsync();
+    await seeder.InsertRolePermissionsAsync();
+    await seeder.InsertAdminsFromCsv();
 }
 
 app.Run();
