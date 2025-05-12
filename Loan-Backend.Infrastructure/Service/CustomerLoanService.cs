@@ -110,12 +110,25 @@ namespace Loan_Backend.Infrastructure.Service
             return ResponseWrapper<string>.Success("Operation succeded.");
         }
 
-        public async Task<ResponseWrapper<PagedResult<CustomerLoan>>> GetLoanByCustomerId(Guid customerId, int pageNum = 1, int pageSize = 10)
+        public async Task<ResponseWrapper<PagedResult<CustomerLoan>>> GetLoanByCustomerId(Guid customerId, LoanStatusEnum? status,
+                                                                                InterestFrequencyEnum? type, int pageNum = 1, int pageSize = 10)
         {
             var customerLoans = await unitOfWork.CustomerLoanRepository.FindAsync(e => e.CustomerId == customerId);
             if(customerLoans == null)
             {
                 return ResponseWrapper<PagedResult<CustomerLoan>>.Error("No record found.");
+            }
+
+            if (type != null)
+            {
+                string typeStr = type.ToString()!;
+                customerLoans = customerLoans.Where(e => e.LoanGroup == typeStr);
+            }
+
+            if (status != null)
+            {
+                string statusStr = status.ToString()!;
+                customerLoans = customerLoans.Where(e => e.Status == statusStr);
             }
 
             int totalCount = customerLoans.Count();
@@ -146,5 +159,49 @@ namespace Loan_Backend.Infrastructure.Service
 
             return ResponseWrapper<CustomerLoan>.Success(loan);
         }
+
+        public async Task<ResponseWrapper<PagedResult<CustomerLoan>>> GetLoans(
+                                                                                LoanStatusEnum? status,
+                                                                                InterestFrequencyEnum? type,
+                                                                                int pageNum = 1, int pageSize = 10)
+        {
+            var customerLoans = await unitOfWork.CustomerLoanRepository.GetAllAsync();
+            if (!customerLoans.Any())
+            {
+                return ResponseWrapper<PagedResult<CustomerLoan>>.Error("No record found.");
+            }
+
+            if (type != null)
+            {
+                string typeStr = type.ToString()!;
+                customerLoans = customerLoans.Where(e => e.LoanGroup == typeStr);
+            }
+
+            if (status != null)
+            {
+                string statusStr = status.ToString()!;
+                customerLoans = customerLoans.Where(e => e.Status == statusStr);
+            }
+
+            
+
+            int totalCount = customerLoans.Count();
+
+            var items = customerLoans
+                .Skip((pageNum - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var pagedResult = new PagedResult<CustomerLoan>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = pageNum,
+                PageSize = pageSize
+            };
+
+            return ResponseWrapper<PagedResult<CustomerLoan>>.Success(pagedResult);
+        }
+
     }
 }

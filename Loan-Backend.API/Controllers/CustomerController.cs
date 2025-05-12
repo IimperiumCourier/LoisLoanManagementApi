@@ -194,13 +194,35 @@ namespace Loan_Backend.API.Controllers
 
 
         [HttpPost]
-        [Route("{customerId}/loans/pagenumber/{pagenum}/pagesize/{pagesize}")]
+        [Route("{customerId}/loan/pagenumber/{pagenum}/pagesize/{pagesize}")]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
         [Consumes(MediaTypeNames.Application.Json)]
-        public async Task<ActionResult> GetCustomerLoans(Guid customerId, int pagenum, int pagesize)
+        public async Task<ActionResult> GetCustomerLoans(Guid customerId, int pagenum, int pagesize,
+                                                        [FromQuery] LoanStatusEnum? status,
+                                                        [FromQuery] InterestFrequencyEnum? type)
         {
-            var response = await customerLoanService.GetLoanByCustomerId(customerId, pagenum, pagesize);
+            var response = await customerLoanService.GetLoanByCustomerId(customerId, status, type, pagenum, pagesize);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("loan/pagenumber/{pagenum}/pagesize/{pagesize}")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async Task<ActionResult> GetLoans(int pagenum, 
+                                                 int pagesize, 
+                                                 [FromQuery] LoanStatusEnum? status,
+                                                 [FromQuery] InterestFrequencyEnum? type)
+        {
+            var response = await customerLoanService.GetLoans(status,type, pagenum, pagesize);
 
             if (!response.IsSuccessful)
             {

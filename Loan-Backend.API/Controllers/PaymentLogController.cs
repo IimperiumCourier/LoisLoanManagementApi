@@ -1,6 +1,7 @@
 ﻿using Loan_Backend.API.Attribute;
 using Loan_Backend.Domain.Interface;
 using Loan_Backend.Infrastructure.Service;
+using Loan_Backend.SharedKernel;
 using Loan_Backend.SharedKernel.Model.DTO;
 using Loan_Backend.SharedKernel.Model.Request;
 using Microsoft.AspNetCore.Http;
@@ -37,9 +38,9 @@ namespace Loan_Backend.API.Controllers
         [HttpGet]
         [Route("loan/{loanId}/pagenumber/{pagenumber}/pagesize/{pagesize}")]
         [HasPermission("can_view_payment_log")]
-        public async Task<ActionResult> GetPaymentLogByLoanId(Guid loanId, int pagenumber, int pagesize)
+        public async Task<ActionResult> GetPaymentLogByLoanId(Guid loanId, int pagenumber, int pagesize, [FromQuery] PaymentStatusEnum? status)
         {
-            var response = await paymentLogService.GetPaymentLogUsingLoanId(loanId, pagenumber, pagesize);
+            var response = await paymentLogService.GetPaymentLogUsingLoanId(loanId, status, pagenumber, pagesize);
 
             if (!response.IsSuccessful)
             {
@@ -52,9 +53,9 @@ namespace Loan_Backend.API.Controllers
         [HttpGet]
         [Route("pagenumber/{pagenumber}/pagesize/{pagesize}")]
         [HasPermission("can_view_payment_log")]
-        public async Task<ActionResult> GetPaymentLogPendingApproval(int pagenumber, int pagesize)
+        public async Task<ActionResult> GetPaymentLogPendingApproval(int pagenumber, int pagesize, [FromQuery] PaymentStatusEnum? status)
         {
-            var response = await paymentLogService.GetPaymentLogsPendingApproval(pagenumber, pagesize);
+            var response = await paymentLogService.GetPaymentLogs(status, pagenumber, pagesize);
 
             if (!response.IsSuccessful)
             {

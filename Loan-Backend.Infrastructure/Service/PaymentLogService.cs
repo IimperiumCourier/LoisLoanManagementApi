@@ -76,13 +76,18 @@ namespace Loan_Backend.Infrastructure.Service
             return ResponseWrapper<string>.Success("Payment declined successfully.");
         }
 
-        public async Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogsPendingApproval(int pageNum = 1, int pageSize = 10)
+        public async Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogs(PaymentStatusEnum? status, int pageNum = 1, int pageSize = 10)
         {
-            var loanPaymentLogs = await unitOfWork.PaymentLogRepository
-                                                  .FindAsync(e => e.Status == PaymentStatusEnum.Pending_Approver_Review.ToString());
+            var loanPaymentLogs = await unitOfWork.PaymentLogRepository.GetAllAsync();
             if (loanPaymentLogs == null)
             {
                 return ResponseWrapper<PagedResult<PaymentLog>>.Error("No record found.");
+            }
+
+            if(status != null)
+            {
+                string statusStr = status.ToString()!;
+                loanPaymentLogs = loanPaymentLogs.Where(e => e.Status == statusStr);
             }
 
             int totalCount = loanPaymentLogs.Count();
@@ -103,12 +108,18 @@ namespace Loan_Backend.Infrastructure.Service
             return ResponseWrapper<PagedResult<PaymentLog>>.Success(pagedResult);
         }
 
-        public async Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogUsingLoanId(Guid loanId, int pageNum = 1, int pageSize = 10)
+        public async Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogUsingLoanId(Guid loanId, PaymentStatusEnum? status, int pageNum = 1, int pageSize = 10)
         {
             var loanPaymentLogs = await unitOfWork.PaymentLogRepository.FindAsync(e => e.LoanId == loanId);
             if (loanPaymentLogs == null)
             {
                 return ResponseWrapper<PagedResult<PaymentLog>>.Error("No record found.");
+            }
+
+            if (status != null)
+            {
+                string statusStr = status.ToString()!;
+                loanPaymentLogs = loanPaymentLogs.Where(e => e.Status == statusStr);
             }
 
             int totalCount = loanPaymentLogs.Count();

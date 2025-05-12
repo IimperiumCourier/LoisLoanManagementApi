@@ -13,8 +13,8 @@ namespace Loan_Backend.Domain.Interface
     public interface IPaymentLogService
     {
         Task<ResponseWrapper<PaymentLog>> LogPayment(CreatePaymentLogReq logRequest, string loggedBy);
-        Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogUsingLoanId(Guid loanId, int pageNum = Common.PageNumber, int pageSize = Common.PageSize);
-        Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogsPendingApproval(int pageNum = Common.PageNumber, int pageSize = Common.PageSize);
+        Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogUsingLoanId(Guid loanId, PaymentStatusEnum? status, int pageNum = Common.PageNumber, int pageSize = Common.PageSize);
+        Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogs(PaymentStatusEnum? status, int pageNum = Common.PageNumber, int pageSize = Common.PageSize);
         Task<ResponseWrapper<string>> ApprovePayment(Guid paymentLogId, string approver);
         Task<ResponseWrapper<string>> DeclinePayment(Guid paymentLogId, string approver);
 
