@@ -19,7 +19,7 @@ namespace Loan_Backend.API.Controllers
                 this.reportService = reportService;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("profit/analytics")]
         [ProducesResponseType(typeof(ResponseWrapper<ProfitAnalyticsResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseWrapper<ProfitAnalyticsResult>), StatusCodes.Status400BadRequest)]
