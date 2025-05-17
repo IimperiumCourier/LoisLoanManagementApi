@@ -56,5 +56,25 @@ namespace Loan_Backend.Infrastructure.Repository
             _dbSet.Update(entity);
             await Task.CompletedTask;
         }
+
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
+        {
+            if (predicate == null)
+            {
+                return await _dbSet.CountAsync();
+            }
+
+            return await _dbSet.CountAsync(predicate);
+        }
+
+        public async Task<decimal> SumAsync(Expression<Func<T, decimal>> selector, Expression<Func<T, bool>>? predicate = null)
+        {
+            if (predicate == null)
+            {
+                return await _dbSet.SumAsync(selector);
+            }
+
+            return await _dbSet.Where(predicate).SumAsync(selector);
+        }
     }
 }

@@ -90,5 +90,7 @@ namespace Loan_Backend.Domain.Entities
             Status = LoanStatusEnum.Paid.ToString();
             return true;
         }
+
+        public decimal InterestEarned => RepaymentAmount - Amount;
     }
 }

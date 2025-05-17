@@ -71,6 +71,12 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IAdminRoleService, AdminRoleService>();
 builder.Services.AddScoped<DataSeeder>();
+builder.Services.AddScoped<MonthlyProfitAnalyticsStrategy>();
+builder.Services.AddScoped<QuarterlyProfitAnalyticsStrategy>();
+builder.Services.AddScoped<YearlyProfitAnalyticsStrategy>();
+builder.Services.AddScoped<CustomProfitAnalyticsStrategy>();
+
+builder.Services.AddScoped<ProfitAnalyticsStrategyFactory>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 

@@ -60,6 +60,27 @@ namespace Loan_Backend.SharedKernel
 
             return input;
         }
+
+        public static string FormatDateWithOrdinal(this DateTime date)
+        {
+            int day = date.Day;
+            string suffix = GetDaySuffix(day);
+            return $"{day}{suffix}-{date:MMM-yyyy}";
+        }
+
+        private static string GetDaySuffix(int day)
+        {
+            if (day >= 11 && day <= 13) return "th";
+
+            return (day % 10) switch
+            {
+                1 => "st",
+                2 => "nd",
+                3 => "rd",
+                _ => "th",
+            };
+        }
+
     }
 
 }
