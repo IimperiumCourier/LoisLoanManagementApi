@@ -77,6 +77,7 @@ builder.Services.AddScoped<YearlyProfitAnalyticsStrategy>();
 builder.Services.AddScoped<CustomProfitAnalyticsStrategy>();
 
 builder.Services.AddScoped<ProfitAnalyticsStrategyFactory>();
+builder.Services.AddScoped<IReportService,ReportService>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
