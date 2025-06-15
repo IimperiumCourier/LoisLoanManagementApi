@@ -17,6 +17,7 @@ namespace Loan_Backend.Domain.Entities
         public DateTime Approved { get; private set; }
         public string ApprovedBy { get; private set; } = string.Empty;
         public string Status { get; private set; } = string.Empty;
+        public Guid RepaymentId { get; private set; }
 
         public PaymentLog(Guid id):base(id)
         {
@@ -28,7 +29,7 @@ namespace Loan_Backend.Domain.Entities
                 
         }
 
-        public static PaymentLog Create(Guid loanId, decimal amount, string currencyCode, string loggedBy)
+        public static PaymentLog Create(Guid loanId, decimal amount, string currencyCode, string loggedBy, Guid repaymentId)
         {
             return new PaymentLog
             {
@@ -37,7 +38,8 @@ namespace Loan_Backend.Domain.Entities
                 CurrencyCode = currencyCode,
                 DateLogged = DateTime.UtcNow.AddHours(1),
                 LoggedBy = loggedBy.ToProperCase(),
-                Status = PaymentStatusEnum.Pending_Approver_Review.ToString()
+                Status = PaymentStatusEnum.Pending_Approver_Review.ToString(),
+                RepaymentId = repaymentId
             };
         }
 

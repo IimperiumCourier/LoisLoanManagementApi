@@ -13,8 +13,70 @@ using System.Threading.Tasks;
 
 namespace Loan_Backend.Infrastructure.Service
 {
-    public class CustomerLoanService(IUnitOfWork unitOfWork) : ICustomerLoanService
+    public class CustomerLoanService(IUnitOfWork unitOfWork, IRepaymentPlanCalculator repaymentPlanCalculator) : ICustomerLoanService
     {
+
+        public async Task<ResponseWrapper<List<LoanRepaymentPlanResponse>>> GetCustomerLoanRepaymentPlan(Guid loanId)
+        {
+            var customerLoan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(loanId);
+            if (customerLoan == null)
+            {
+                return ResponseWrapper<List<LoanRepaymentPlanResponse>>.Error("No record found.");
+            }
+
+            var repaymentPlan = await unitOfWork.RepaymentPlanRepository.FindAsync(e => e.LoanId == loanId);
+            var customer = await unitOfWork.CustomerRepository.GetByIdAsync(customerLoan.CustomerId);
+            if(customer == null)
+            {
+                return ResponseWrapper<List<LoanRepaymentPlanResponse>>.Error("customer record not found.");
+            }
+
+            var result = repaymentPlan.Select(e => new LoanRepaymentPlanResponse
+            {
+                AmountBorrowed = customerLoan.Amount,
+                AmountPerInstallment = customerLoan.AmountPerInstallment,
+                AmountToBeRepaid = customerLoan.RepaymentAmount,
+                DueDate = e.DueDate,
+                Fullname = customer.FullName,
+                IsPaid = e.IsPaid
+            }).ToList();
+
+            return ResponseWrapper<List<LoanRepaymentPlanResponse>>.Success(result);
+        }
+
+        public async Task<ResponseWrapper<List<LoanRepaymentPlanResponse>>> GetDueLoanRepaymentPlan(DateTime from, DateTime to)
+        {
+            var result = new List<LoanRepaymentPlanResponse>();
+            var dueRepaymentPlans = await unitOfWork.RepaymentPlanRepository.FindAsync(e => !e.IsPaid && (e.DueDate >= from && e.DueDate <= to));
+
+            foreach(var repaymentPlan in dueRepaymentPlans)
+            {
+                var loan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(repaymentPlan.LoanId);
+                if(loan == null)
+                {
+                    continue;
+                }
+
+                var customer = await unitOfWork.CustomerRepository.GetByIdAsync(loan.CustomerId);
+                if(customer == null) {  
+                    continue;
+                }
+
+                result.Add(new LoanRepaymentPlanResponse
+                {
+                    AmountBorrowed = loan.Amount,
+                    AmountPerInstallment = loan.AmountPerInstallment,
+                    AmountToBeRepaid = loan.RepaymentAmount,
+                    DueDate = repaymentPlan.DueDate,
+                    Fullname = customer.FullName,
+                    IsPaid = repaymentPlan.IsPaid
+                });
+            }
+
+
+            return ResponseWrapper<List<LoanRepaymentPlanResponse>>.Success(result);
+        }
+
         public async Task<ResponseWrapper<string>> ApproveLoan(Guid customerLoanId, string approver)
         {
             var customerLoan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(customerLoanId); 
@@ -24,7 +86,17 @@ namespace Loan_Backend.Infrastructure.Service
             }
 
             customerLoan.AddApproverInfo(approver);
+
+            var computedRepaymentPlan = repaymentPlanCalculator.ComputeRepaymentPlan(customerLoan);
+
+            customerLoan.SetInstallmentDetails(computedRepaymentPlan.AmountPerInstallment, computedRepaymentPlan.NumberOfPaymentInstallments);
+
+            var customerRepaymentPlans = customerLoan.GetRepaymentPlan(computedRepaymentPlan.DueDates);
+
             await unitOfWork.CustomerLoanRepository.UpdateAsync(customerLoan);
+
+            await unitOfWork.RepaymentPlanRepository.AddRangeAsync(customerRepaymentPlans);
+
             var count = await unitOfWork.SaveAsync();
             if(count <= 0)
             {

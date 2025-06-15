@@ -2,6 +2,7 @@
 using Loan_Backend.SharedKernel;
 using Loan_Backend.SharedKernel.Model.DTO;
 using Loan_Backend.SharedKernel.Model.Request;
+using Loan_Backend.SharedKernel.Model.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,5 +23,7 @@ namespace Loan_Backend.Domain.Interface
         Task<ResponseWrapper<PagedResult<CustomerLoan>>> GetLoans(LoanStatusEnum? status,
                                                                   InterestFrequencyEnum? type,
                                                                   int pageNum = 1, int pageSize = 10);
+        Task<ResponseWrapper<List<LoanRepaymentPlanResponse>>> GetDueLoanRepaymentPlan(DateTime from, DateTime to);
+        Task<ResponseWrapper<List<LoanRepaymentPlanResponse>>> GetCustomerLoanRepaymentPlan(Guid loanId);
     }
 }

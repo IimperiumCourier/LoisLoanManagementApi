@@ -18,6 +18,7 @@ namespace Loan_Backend.Domain.Interface
         IBaseRepository<PaymentLog> PaymentLogRepository { get; }
         IBaseRepository<LoginHistory> LoginHistoryRepository { get; }
         IBaseRepository<Role> RoleRepository { get; }
+        IBaseRepository<CustomerLoanRepaymentPlan> RepaymentPlanRepository { get; }
         Task<int> SaveAsync();
     }
 }

@@ -175,7 +175,7 @@ namespace Loan_Backend.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("loan/{id}")]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
@@ -193,7 +193,7 @@ namespace Loan_Backend.API.Controllers
         }
 
 
-        [HttpPost]
+        [HttpGet]
         [Route("{customerId}/loan/pagenumber/{pagenum}/pagesize/{pagesize}")]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
@@ -212,7 +212,7 @@ namespace Loan_Backend.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("loan/pagenumber/{pagenum}/pagesize/{pagesize}")]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
@@ -223,6 +223,40 @@ namespace Loan_Backend.API.Controllers
                                                  [FromQuery] InterestFrequencyEnum? type)
         {
             var response = await customerLoanService.GetLoans(status,type, pagenum, pagesize);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("loan/{id}/paymentplan")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async Task<ActionResult> GetCustomerLoanPaymentPlan(Guid id)
+        {
+            var response = await customerLoanService.GetCustomerLoanRepaymentPlan(id);
+
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("loan/paymentplan")]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseWrapper<string>), StatusCodes.Status400BadRequest)]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async Task<ActionResult> GetLoanPaymentPlans([FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            var response = await customerLoanService.GetDueLoanRepaymentPlan(from, to);
 
             if (!response.IsSuccessful)
             {

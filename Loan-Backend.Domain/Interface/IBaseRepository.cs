@@ -18,5 +18,6 @@ namespace Loan_Backend.Domain.Interface
         Task SaveAsync();
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
         Task<decimal> SumAsync(Expression<Func<T, decimal>> selector, Expression<Func<T, bool>>? predicate = null);
+        Task AddRangeAsync(IEnumerable<T> entity);
     }
 }

@@ -76,5 +76,10 @@ namespace Loan_Backend.Infrastructure.Repository
 
             return await _dbSet.Where(predicate).SumAsync(selector);
         }
+
+        public async Task AddRangeAsync(IEnumerable<T> entity)
+        {
+            await _dbSet.AddRangeAsync(entity);
+        }
     }
 }

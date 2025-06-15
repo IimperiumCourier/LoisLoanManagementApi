@@ -18,8 +18,8 @@ namespace Loan_Backend.Infrastructure.Interest_Stratergy
 
             _strategy = frequency switch
             {
-                InterestFrequencyEnum.Weekly => new WeeklyInterestStrategy(),
-                InterestFrequencyEnum.Monthly => new MonthlyInterestStrategy(),
+                InterestFrequencyEnum.Weekly => new InterestStrategy(),
+                InterestFrequencyEnum.Monthly => new InterestStrategy(),
                 _ => throw new NotImplementedException("Strategy not implemented.")
             };
         }
