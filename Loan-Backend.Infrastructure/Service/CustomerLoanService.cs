@@ -99,7 +99,7 @@ namespace Loan_Backend.Infrastructure.Service
             }
 
             customerLoan.Defaulted();
-            await unitOfWork.CustomerLoanRepository.AddAsync(customerLoan);
+            await unitOfWork.CustomerLoanRepository.UpdateAsync(customerLoan);
 
             var dbResponse = await unitOfWork.SaveAsync();
             if (dbResponse <= 0)

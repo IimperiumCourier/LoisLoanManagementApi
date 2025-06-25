@@ -44,6 +44,7 @@ namespace Loan_Backend.Domain.Entities
         public void Approve(string approvedBy)
         {
             ApprovedBy = approvedBy.ToProperCase();
+            Status = PaymentStatusEnum.Approved.ToString();
         }
 
         public void Decline(string declinedBy)
