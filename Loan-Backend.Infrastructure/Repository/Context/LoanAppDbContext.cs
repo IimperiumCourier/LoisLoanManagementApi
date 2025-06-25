@@ -23,6 +23,7 @@ namespace Loan_Backend.Infrastructure.Repository.Context
         public DbSet<AdminRole> AdminRoles { get; set; }
         public DbSet<PaymentLog> PaymentLogs { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<CustomerLoanRepaymentPlan> CustomerLoanRepaymentPlan { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +33,7 @@ namespace Loan_Backend.Infrastructure.Repository.Context
             modelBuilder.ApplyConfiguration(new PaymentLogConfiguration());
             modelBuilder.ApplyConfiguration(new PermissionConfiguration());
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new CustomerLoanRepaymentPlanConfiguration());
         }
     }
 }

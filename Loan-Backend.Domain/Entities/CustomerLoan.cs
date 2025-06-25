@@ -22,6 +22,10 @@ namespace Loan_Backend.Domain.Entities
         public decimal InterestRatePercent { get; private set; }
         public decimal RepaymentAmount { get; private set; }
         public int DurationInWeeks { get; private set; }
+        public int NumberOfInstallments { get; private set; }
+        public decimal AmountPerInstallment { get; private set; }
+
+        public decimal InterestEarned => RepaymentAmount - Amount;
 
         public CustomerLoan(Guid id):base(id)
         {
@@ -91,6 +95,15 @@ namespace Loan_Backend.Domain.Entities
             return true;
         }
 
-        public decimal InterestEarned => RepaymentAmount - Amount;
+        public void SetInstallmentDetails(decimal amountPerInstallment, int numOfInstallments)
+        {
+            NumberOfInstallments = numOfInstallments;
+            AmountPerInstallment = amountPerInstallment;
+        }
+
+        public List<CustomerLoanRepaymentPlan> GetRepaymentPlan(List<DateTime> repaymentDates)
+        {
+            return repaymentDates.Select(repaymentDate => CustomerLoanRepaymentPlan.CreateRepaymentPlan(repaymentDate, Id)).ToList();
+        }
     }
 }

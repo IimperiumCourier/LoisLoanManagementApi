@@ -16,6 +16,7 @@ namespace Loan_Backend.Infrastructure.Repository
         public IBaseRepository<PaymentLog> PaymentLogRepository => new BaseRepository<PaymentLog>(context);
         public IBaseRepository<LoginHistory> LoginHistoryRepository => new BaseRepository<LoginHistory>(context);
         public IBaseRepository<Role> RoleRepository => new BaseRepository<Role>(context);
+        public IBaseRepository<CustomerLoanRepaymentPlan> RepaymentPlanRepository => new BaseRepository<CustomerLoanRepaymentPlan>(context);
 
         public void Dispose()
         {

@@ -45,6 +45,16 @@ namespace Loan_Backend.Infrastructure.Service
                 await unitOfWork.CustomerLoanRepository.UpdateAsync(loan);
             }
 
+            var repaymentPlan = await unitOfWork.RepaymentPlanRepository.GetByIdAsync(paymentLog.RepaymentId);
+            if (repaymentPlan is null)
+            {
+                return ResponseWrapper<string>.Error("Repayment plan record not found.");
+            }
+
+            repaymentPlan.MarkRepaymentAsPaid();
+
+            await unitOfWork.RepaymentPlanRepository.UpdateAsync(repaymentPlan);
+
             await unitOfWork.PaymentLogRepository.UpdateAsync(paymentLog);
 
             var dbCount = await unitOfWork.SaveAsync();
@@ -76,12 +86,13 @@ namespace Loan_Backend.Infrastructure.Service
             return ResponseWrapper<string>.Success("Payment declined successfully.");
         }
 
-        public async Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogs(PaymentStatusEnum? status, int pageNum = 1, int pageSize = 10)
+        public async Task<ResponseWrapper<PagedResult<PaymentLogDto>>> GetPaymentLogs(PaymentStatusEnum? status, int pageNum = 1, int pageSize = 10)
         {
+            var paymentLogDtos = new List<PaymentLogDto>();
             var loanPaymentLogs = await unitOfWork.PaymentLogRepository.GetAllAsync();
             if (loanPaymentLogs == null)
             {
-                return ResponseWrapper<PagedResult<PaymentLog>>.Error("No record found.");
+                return ResponseWrapper<PagedResult<PaymentLogDto>>.Error("No record found.");
             }
 
             if(status != null)
@@ -97,24 +108,53 @@ namespace Loan_Backend.Infrastructure.Service
                 .Take(pageSize)
                 .ToList();
 
-            var pagedResult = new PagedResult<PaymentLog>
+            foreach (var item in items) 
             {
-                Items = items,
+                var loan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(item.LoanId);
+
+                var customerInfo = await unitOfWork.CustomerRepository.GetByIdAsync(loan.CustomerId);
+
+                paymentLogDtos.Add(new PaymentLogDto
+                {
+                    CustomerId = customerInfo!.Id.ToString(),
+                    AmountPaid = item.AmountPaid,
+                    Approved = item.Approved,
+                    ApprovedBy = item.ApprovedBy,
+                    CurrencyCode = item.CurrencyCode,
+                    CustomerEmail = customerInfo!.Email,
+                    CustomerName = customerInfo!.FullName,
+                    CustomerPhone = customerInfo!.Phonenumber,
+                    DateLogged = item.DateLogged,
+                    LoanId = item.LoanId,
+                    LoggedBy = item.LoggedBy,
+                    PaymentLogId = item.Id,
+                    Status = item.Status
+
+                });
+            }
+
+            var pagedResult = new PagedResult<PaymentLogDto>
+            {
+                Items = paymentLogDtos,
                 TotalCount = totalCount,
                 PageNumber = pageNum,
                 PageSize = pageSize
             };
 
-            return ResponseWrapper<PagedResult<PaymentLog>>.Success(pagedResult);
+            return ResponseWrapper<PagedResult<PaymentLogDto>>.Success(pagedResult);
         }
 
-        public async Task<ResponseWrapper<PagedResult<PaymentLog>>> GetPaymentLogUsingLoanId(Guid loanId, PaymentStatusEnum? status, int pageNum = 1, int pageSize = 10)
+        public async Task<ResponseWrapper<PagedResult<PaymentLogDto>>> GetPaymentLogUsingLoanId(Guid loanId, PaymentStatusEnum? status, int pageNum = 1, int pageSize = 10)
         {
             var loanPaymentLogs = await unitOfWork.PaymentLogRepository.FindAsync(e => e.LoanId == loanId);
             if (loanPaymentLogs == null)
             {
-                return ResponseWrapper<PagedResult<PaymentLog>>.Error("No record found.");
+                return ResponseWrapper<PagedResult<PaymentLogDto>>.Error("No record found.");
             }
+
+            var loan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(loanId);
+
+            var customerInfo = await unitOfWork.CustomerRepository.GetByIdAsync(loan.CustomerId);
 
             if (status != null)
             {
@@ -129,15 +169,31 @@ namespace Loan_Backend.Infrastructure.Service
                 .Take(pageSize)
                 .ToList();
 
-            var pagedResult = new PagedResult<PaymentLog>
+            var pagedResult = new PagedResult<PaymentLogDto>
             {
-                Items = items,
+                Items = items.Select(e => new PaymentLogDto
+                {
+                    CustomerId = customerInfo!.Id.ToString(),
+                    AmountPaid = e.AmountPaid,
+                    Approved = e.Approved,
+                    ApprovedBy = e.ApprovedBy,
+                    CurrencyCode = e.CurrencyCode,
+                    CustomerEmail = customerInfo!.Email,
+                    CustomerName = customerInfo!.FullName,
+                    CustomerPhone = customerInfo!.Phonenumber,
+                    DateLogged = e.DateLogged,
+                    LoanId = loanId,
+                    LoggedBy = e.LoggedBy,
+                    PaymentLogId = e.Id,
+                    Status = e.Status
+
+                }),
                 TotalCount = totalCount,
                 PageNumber = pageNum,
                 PageSize = pageSize
             };
 
-            return ResponseWrapper<PagedResult<PaymentLog>>.Success(pagedResult);
+            return ResponseWrapper<PagedResult<PaymentLogDto>>.Success(pagedResult);
         }
 
         public async Task<ResponseWrapper<PaymentLog>> LogPayment(CreatePaymentLogReq logRequest, string loggedBy)
@@ -153,12 +209,22 @@ namespace Loan_Backend.Infrastructure.Service
                 return ResponseWrapper<PaymentLog>.Error("Loan record not found.");
             }
 
-            if(!string.Equals(loan.CurrencyCode, logRequest.CurrencyCode, StringComparison.OrdinalIgnoreCase))
+            var repaymentPlan = await unitOfWork.RepaymentPlanRepository.GetByIdAsync(logRequest.RepaymentId);
+            if (repaymentPlan is null) { 
+                return ResponseWrapper<PaymentLog>.Error("Repayment plan record not found.");
+            }
+
+            if (repaymentPlan.LoanId != loan.Id)
+            {
+                return ResponseWrapper<PaymentLog>.Error($"Repayment plan with id ::: {logRequest.RepaymentId} does not belong to loan with id ::: {logRequest.LoanId}.");
+            }
+
+            if (!string.Equals(loan.CurrencyCode, logRequest.CurrencyCode, StringComparison.OrdinalIgnoreCase))
             {
                 return ResponseWrapper<PaymentLog>.Error("Currency code does not match loan record.");
             }
 
-            var paymentLog = PaymentLog.Create(logRequest.LoanId, logRequest.Amount, logRequest.CurrencyCode, loggedBy);
+            var paymentLog = PaymentLog.Create(logRequest.LoanId, logRequest.Amount, logRequest.CurrencyCode, loggedBy, logRequest.RepaymentId);
             await unitOfWork.PaymentLogRepository.AddAsync(paymentLog);
 
             var count = await unitOfWork.SaveAsync();

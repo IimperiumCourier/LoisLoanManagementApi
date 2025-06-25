@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 
 namespace Loan_Backend.Infrastructure.Interest_Stratergy
 {
-    public class MonthlyInterestStrategy : IInterestStrategy
+    public class InterestStrategy : IInterestStrategy
     {
+        private const decimal interestRate = 0.26M;
         public decimal CalculateInterest(decimal principal, decimal annualRate, int durationInWeeks)
         {
-            double months = durationInWeeks / 4.345; // Approx. weeks per month
-            double timeInYears = months / 12.0;
-            decimal interest = (principal * annualRate * (decimal)timeInYears) / 100;
+            decimal interest = principal * interestRate;
             return interest;
         }
     }
