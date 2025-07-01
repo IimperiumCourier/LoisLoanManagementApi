@@ -19,19 +19,22 @@ namespace Loan_Backend.Domain.Entities
         public string Status { get; private set; } = string.Empty;
         public Guid RepaymentId { get; private set; }
 
-        public PaymentLog(Guid id):base(id)
+        public PaymentLog(Guid id) : base(id)
         {
-                
+            // This constructor is used when an ID is explicitly passed (e.g., when retrieving from DB)
         }
 
-        public PaymentLog():base(Guid.NewGuid())
+        public PaymentLog() : base(Guid.NewGuid())
         {
-                
+            // This parameterless constructor automatically generates a new GUID for the base entity
         }
 
         public static PaymentLog Create(Guid loanId, decimal amount, string currencyCode, string loggedBy, Guid repaymentId)
         {
-            return new PaymentLog
+            // Explicitly call the parameterless constructor to ensure a new GUID is generated
+            // by the BaseEntity constructor.
+            // Then, set the other properties using object initializer syntax.
+            return new PaymentLog() // This calls the parameterless constructor, which calls base(Guid.NewGuid())
             {
                 AmountPaid = amount,
                 LoanId = loanId,

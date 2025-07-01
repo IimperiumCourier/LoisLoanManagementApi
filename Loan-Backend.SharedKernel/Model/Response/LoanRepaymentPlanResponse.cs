@@ -8,6 +8,8 @@ namespace Loan_Backend.SharedKernel.Model.Response
 {
     public class LoanRepaymentPlanResponse
     {
+        public Guid Id { get; set; }
+        public Guid LoanId { get; set; }
         public string Fullname { get; set; } = string.Empty;
         public decimal AmountBorrowed { get; set; }
         public decimal AmountToBeRepaid { get; set; }

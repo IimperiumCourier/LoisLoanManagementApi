@@ -26,13 +26,18 @@ namespace Loan_Backend.Infrastructure.Service
 
             var repaymentPlan = await unitOfWork.RepaymentPlanRepository.FindAsync(e => e.LoanId == loanId);
             var customer = await unitOfWork.CustomerRepository.GetByIdAsync(customerLoan.CustomerId);
-            if(customer == null)
+            if (customer == null)
             {
                 return ResponseWrapper<List<LoanRepaymentPlanResponse>>.Error("customer record not found.");
             }
 
             var result = repaymentPlan.Select(e => new LoanRepaymentPlanResponse
             {
+                // This method is for specific loan, 'e.Id' is the repayment item ID
+                Id = e.Id,
+                // Assign LoanId from the repaymentPlan entity 'e' for consistency
+                LoanId = e.LoanId, // Assuming 'e' (repaymentPlan entity) has a LoanId property
+
                 AmountBorrowed = customerLoan.Amount,
                 AmountPerInstallment = customerLoan.AmountPerInstallment,
                 AmountToBeRepaid = customerLoan.RepaymentAmount,
@@ -47,40 +52,46 @@ namespace Loan_Backend.Infrastructure.Service
         public async Task<ResponseWrapper<List<LoanRepaymentPlanResponse>>> GetDueLoanRepaymentPlan(DateTime from, DateTime to)
         {
             var result = new List<LoanRepaymentPlanResponse>();
+            // Ensure this FindAsync query fetches LoanId as part of the RepaymentPlan entity
             var dueRepaymentPlans = await unitOfWork.RepaymentPlanRepository.FindAsync(e => !e.IsPaid && (e.DueDate >= from && e.DueDate <= to));
 
-            foreach(var repaymentPlan in dueRepaymentPlans)
+            foreach (var repaymentPlan in dueRepaymentPlans) // 'repaymentPlan' here is an entity from your database
             {
                 var loan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(repaymentPlan.LoanId);
-                if(loan == null)
+                if (loan == null)
                 {
                     continue;
                 }
 
                 var customer = await unitOfWork.CustomerRepository.GetByIdAsync(loan.CustomerId);
-                if(customer == null) {  
+                if (customer == null)
+                {
                     continue;
                 }
 
                 result.Add(new LoanRepaymentPlanResponse
                 {
+                    // === CRITICAL FIXES START HERE ===
+                    Id = repaymentPlan.Id, // <-- Assign the actual repayment plan item ID
+                    LoanId = repaymentPlan.LoanId, // <-- Assign the LoanId from the repaymentPlan entity
+                    // === CRITICAL FIXES END HERE ===
+
+                    Fullname = customer.FullName, // This is correct, uses customer's full name
                     AmountBorrowed = loan.Amount,
                     AmountPerInstallment = loan.AmountPerInstallment,
                     AmountToBeRepaid = loan.RepaymentAmount,
                     DueDate = repaymentPlan.DueDate,
-                    Fullname = customer.FullName,
                     IsPaid = repaymentPlan.IsPaid
                 });
             }
-
 
             return ResponseWrapper<List<LoanRepaymentPlanResponse>>.Success(result);
         }
 
         public async Task<ResponseWrapper<string>> ApproveLoan(Guid customerLoanId, string approver)
         {
-            var customerLoan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(customerLoanId); 
-            if(customerLoan == null)
+            var customerLoan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(customerLoanId);
+            if (customerLoan == null)
             {
                 return ResponseWrapper<string>.Error("No record found.");
             }
@@ -98,7 +109,7 @@ namespace Loan_Backend.Infrastructure.Service
             await unitOfWork.RepaymentPlanRepository.AddRangeAsync(customerRepaymentPlans);
 
             var count = await unitOfWork.SaveAsync();
-            if(count <= 0)
+            if (count <= 0)
             {
                 return ResponseWrapper<string>.Error("Operation failed.");
             }
@@ -114,7 +125,7 @@ namespace Loan_Backend.Infrastructure.Service
             }
 
             var customer = await unitOfWork.CustomerRepository.GetByIdAsync(request.CustomerId);
-            if(customer == null)
+            if (customer == null)
             {
                 return ResponseWrapper<CustomerLoan>.Error("Customer record not found.");
             }
@@ -128,8 +139,8 @@ namespace Loan_Backend.Infrastructure.Service
             }
 
             var repaymentAmt = customerLoan.Amount + interestCalculator.Calculate(customerLoan.Amount,
-                                                                                  customerLoan.InterestRatePercent,
-                                                                                  customerLoan.DurationInWeeks);
+                                                                                 customerLoan.InterestRatePercent,
+                                                                                 customerLoan.DurationInWeeks);
             customerLoan.AddRepaymentAmount(repaymentAmt);
             await unitOfWork.CustomerLoanRepository.AddAsync(customerLoan);
 
@@ -151,7 +162,8 @@ namespace Loan_Backend.Infrastructure.Service
             }
 
             customerLoan.Declined();
-            await unitOfWork.CustomerLoanRepository.AddAsync(customerLoan);
+            // Corrected line: Use UpdateAsync to modify an existing record
+            await unitOfWork.CustomerLoanRepository.UpdateAsync(customerLoan);
 
             var dbResponse = await unitOfWork.SaveAsync();
             if (dbResponse <= 0)
@@ -161,7 +173,6 @@ namespace Loan_Backend.Infrastructure.Service
 
             return ResponseWrapper<string>.Success("Operation succeded.");
         }
-
         public async Task<ResponseWrapper<string>> DefaultLoan(Guid customerLoanId)
         {
             var customerLoan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(customerLoanId);
@@ -183,10 +194,10 @@ namespace Loan_Backend.Infrastructure.Service
         }
 
         public async Task<ResponseWrapper<PagedResult<CustomerLoan>>> GetLoanByCustomerId(Guid customerId, LoanStatusEnum? status,
-                                                                                InterestFrequencyEnum? type, int pageNum = 1, int pageSize = 10)
+                                                                                         InterestFrequencyEnum? type, int pageNum = 1, int pageSize = 10)
         {
             var customerLoans = await unitOfWork.CustomerLoanRepository.FindAsync(e => e.CustomerId == customerId);
-            if(customerLoans == null)
+            if (customerLoans == null)
             {
                 return ResponseWrapper<PagedResult<CustomerLoan>>.Error("No record found.");
             }
@@ -224,7 +235,7 @@ namespace Loan_Backend.Infrastructure.Service
         public async Task<ResponseWrapper<CustomerLoan>> GetLoanById(Guid customerLoanId)
         {
             var loan = await unitOfWork.CustomerLoanRepository.GetByIdAsync(customerLoanId);
-            if(loan == null)
+            if (loan == null)
             {
                 return ResponseWrapper<CustomerLoan>.Error("No record found.");
             }
@@ -233,9 +244,9 @@ namespace Loan_Backend.Infrastructure.Service
         }
 
         public async Task<ResponseWrapper<PagedResult<CustomerLoan>>> GetLoans(
-                                                                                LoanStatusEnum? status,
-                                                                                InterestFrequencyEnum? type,
-                                                                                int pageNum = 1, int pageSize = 10)
+                                                                                 LoanStatusEnum? status,
+                                                                                 InterestFrequencyEnum? type,
+                                                                                 int pageNum = 1, int pageSize = 10)
         {
             var customerLoans = await unitOfWork.CustomerLoanRepository.GetAllAsync();
             if (!customerLoans.Any())
@@ -255,7 +266,6 @@ namespace Loan_Backend.Infrastructure.Service
                 customerLoans = customerLoans.Where(e => e.Status == statusStr);
             }
 
-            
 
             int totalCount = customerLoans.Count();
 

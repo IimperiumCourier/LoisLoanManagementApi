@@ -9,7 +9,7 @@ namespace Loan_Backend.Infrastructure.Interest_Stratergy
 {
     public class InterestStrategy : IInterestStrategy
     {
-        private const decimal interestRate = 0.26M;
+        private const decimal interestRate = 0.265M;
         public decimal CalculateInterest(decimal principal, decimal annualRate, int durationInWeeks)
         {
             decimal interest = principal * interestRate;
